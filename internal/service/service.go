@@ -104,8 +104,10 @@ func (s *Service) CreatePR(ctx context.Context, reqID, name, authorID string) (*
 	}
 	
 	chosenReviewers := make([]string, 0, limit)
+	choseStructs := make([]entity.User, 0, limit)
 	for i := 0; i < limit; i++ {
 		chosenReviewers = append(chosenReviewers, candidates[i].ID)
+		choseStructs = append(choseStructs, candidates[i])
 	}
 
 	pr := entity.PullRequest{
@@ -114,7 +116,7 @@ func (s *Service) CreatePR(ctx context.Context, reqID, name, authorID string) (*
 		AuthorID:  authorID,
 		Status:    "OPEN",
 		CreatedAt: time.Now(),
-		Reviewers: nil,
+		Reviewers: choseStructs,
 	}
 
 	tx, err := s.repo.BeginTx(ctx)
