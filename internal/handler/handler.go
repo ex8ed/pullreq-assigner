@@ -4,6 +4,7 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 
 	"ex8ed/pullreq-assigner/internal/entity"
@@ -26,7 +27,9 @@ func (h *Handler) respondJSON(w http.ResponseWriter, status int, payload interfa
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	if payload != nil {
-		json.NewEncoder(w).Encode(payload)
+		if err := json.NewEncoder(w).Encode(payload); err != nil {
+			log.Printf("error writing response: %v", err)
+		}
 	}
 }
 
@@ -63,7 +66,7 @@ func (h *Handler) respondError(w http.ResponseWriter, err error) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{
 		"error": map[string]string{
 			"code":    appCode,
 			"message": msg,
