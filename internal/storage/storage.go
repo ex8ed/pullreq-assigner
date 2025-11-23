@@ -7,6 +7,7 @@ import (
 	"errors"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 
 	"ex8ed/pullreq-assigner/internal/entity"
@@ -125,7 +126,17 @@ func (s *Storage) SavePR(ctx context.Context, tx *sqlx.Tx, pr entity.PullRequest
 		VALUES (:id, :name, :author_id, :status, :created_at)
 	`
 	_, err := tx.NamedExecContext(ctx, query, pr)
-	return err
+
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			if pqErr.Code == "23505" {
+				return ErrAlreadyExists
+			}
+		}
+		return err
+	}
+
+	return nil
 }
 
 
